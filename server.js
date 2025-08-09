@@ -9,17 +9,22 @@ const userService = require('./user-service.js');
 
 const app = express();
 
-// ----- CORS FIX -----
-const corsOptions = {
-  origin: '*', // allow all origins (you can lock down to your frontend URL if you want)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-// --------------------
+// --------- CORS: bullet-proof preflight ----------
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // or your frontend origin
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-// Parse JSON bodies
+  // Short-circuit preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+// -------------------------------------------------
+
+// (optional) keep cors() as well
+app.use(cors());
 app.use(express.json());
 
 // ----- Passport JWT strategy -----
@@ -31,17 +36,14 @@ const jwtOptions = {
 
 passport.use(
   new JwtStrategy(jwtOptions, (jwt_payload, done) => {
-    if (jwt_payload) {
-      return done(null, { _id: jwt_payload._id, userName: jwt_payload.userName });
-    } else {
-      return done(null, false);
-    }
+    if (jwt_payload) return done(null, { _id: jwt_payload._id, userName: jwt_payload.userName });
+    return done(null, false);
   })
 );
 app.use(passport.initialize());
 const auth = passport.authenticate('jwt', { session: false });
 
-// ----- Routes -----
+// ----- Routes (unchanged) -----
 app.post('/api/user/register', async (req, res) => {
   try {
     const msg = await userService.registerUser(req.body);
