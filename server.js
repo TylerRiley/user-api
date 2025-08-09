@@ -8,7 +8,18 @@ const jwt = require('jsonwebtoken');
 const userService = require('./user-service.js');
 
 const app = express();
-app.use(cors());
+
+// ----- CORS FIX -----
+const corsOptions = {
+  origin: '*', // allow all origins (you can lock down to your frontend URL if you want)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+// --------------------
+
+// Parse JSON bodies
 app.use(express.json());
 
 // ----- Passport JWT strategy -----
@@ -53,7 +64,7 @@ app.post('/api/user/login', async (req, res) => {
 
 app.get('/api/user/favourites', auth, async (req, res) => {
   try {
-    const data = await userService.getFavourites(req.user._id); // CHANGED
+    const data = await userService.getFavourites(req.user._id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
@@ -62,7 +73,7 @@ app.get('/api/user/favourites', auth, async (req, res) => {
 
 app.put('/api/user/favourites/:id', auth, async (req, res) => {
   try {
-    const data = await userService.addFavourite(req.user._id, req.params.id); // CHANGED
+    const data = await userService.addFavourite(req.user._id, req.params.id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
@@ -71,7 +82,7 @@ app.put('/api/user/favourites/:id', auth, async (req, res) => {
 
 app.delete('/api/user/favourites/:id', auth, async (req, res) => {
   try {
-    const data = await userService.removeFavourite(req.user._id, req.params.id); // CHANGED
+    const data = await userService.removeFavourite(req.user._id, req.params.id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
@@ -80,7 +91,7 @@ app.delete('/api/user/favourites/:id', auth, async (req, res) => {
 
 app.get('/api/user/history', auth, async (req, res) => {
   try {
-    const data = await userService.getHistory(req.user._id); // CHANGED
+    const data = await userService.getHistory(req.user._id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
@@ -89,7 +100,7 @@ app.get('/api/user/history', auth, async (req, res) => {
 
 app.put('/api/user/history/:id', auth, async (req, res) => {
   try {
-    const data = await userService.addHistory(req.user._id, req.params.id); // CHANGED
+    const data = await userService.addHistory(req.user._id, req.params.id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
@@ -98,7 +109,7 @@ app.put('/api/user/history/:id', auth, async (req, res) => {
 
 app.delete('/api/user/history/:id', auth, async (req, res) => {
   try {
-    const data = await userService.removeHistory(req.user._id, req.params.id); // CHANGED
+    const data = await userService.removeHistory(req.user._id, req.params.id);
     res.json(data);
   } catch (err) {
     res.status(422).json({ message: err.toString() });
