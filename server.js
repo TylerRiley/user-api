@@ -128,3 +128,6 @@ userService.connect().then(() => {
   console.error('unable to start the server:', err);
   process.exit(1);
 });
+
+// ✅ Export for @vercel/node
+module.exports = app;
